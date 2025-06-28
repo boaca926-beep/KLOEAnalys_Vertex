@@ -18,46 +18,63 @@ void MyClass::Main()
   Long64_t nentries = fChain->GetEntriesFast();
   
   Long64_t nbytes = 0, nb = 0;
-  for (Long64_t jentry=0; jentry<nentries;jentry++) {
+
+  Long64_t evnt_tot = 0;
+  Long64_t evnt_vtx1 = 0;
+  
+
+  // fiducial parameters
+  cout << "Zvmax = " << Zvmax << ", Rhovmax = " << Rhovmax << endl;
+
+  for (Long64_t jentry=0; jentry<nentries;jentry++) {// Main loop
     Long64_t ientry = LoadTree(jentry);
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
     // if (Cut(ientry) < 0) continue;
-    evnt_sum ++;
+    evnt_tot ++;
     
-    // Select events with only 1 vertex in the fiducial volume
-    getVertices();
-
-    if (iv_ip != 1) continue; // vertex cut
-    fiduial_indx = 1;
-    evnt_fidual ++;
+    // Select events with only 1 vertex within the fiducial volume
+    int nvip = 0; // number of vertices at IP (vip) within the fiducial volume 
+    int kvip[3]; // index of vip
+    int kvip_nvip1 = -1; // index of nvip equal 1
     
-    cout << "ip = " << iv_ip  << ", indx = " << iv_indx << endl;
-  
-  }
+    for (int kv = 0; kv < nv; kv++) {// loop on vertices
+      
+      if (TMath::Abs(zv[kv] - bz) < Zvmax && TMath::Sqrt((xv[kv] - bx) * (xv[kv] - bx) + (yv[kv] - by) * (yv[kv] - by)) < Rhovmax) { // fiducial volume
+	
+	kvip[nvip] = kv;
+	nvip ++;
 
-  cout << "evnt_sum = " << evnt_sum << "\n"
-       << "evnt_fidual = " << evnt_fidual << endl;
-  
+	h_nvip_kvip -> Fill(nvip, kvip[nvip - 1]);
+	
+	//cout << "nvip = " << nvip << ", kv = " << kv << ", kvip[" << nvip - 1  << "] = " << kvip[nvip - 1] << endl;
+	
+      }
+      
+    }
+
+    if (nvip != 1) continue;
+    kvip_nvip1 = kvip[nvip - 1];
+      
+    evnt_vtx1 ++;
+      
+    cout << "nvip = " << nvip << ", kvip_nvip1 = " << kvip_nvip1 << endl; 
+    h_nvip1_kvip -> Fill(nvip, kvip_nvip1);
+	
+    
+    
+  }// end the main loop
+
+  cout << "total # events = " << evnt_tot << "\n"
+       << "evnt_vtx1 = " << evnt_vtx1 << "\n";
+      
 
 }
 
-void MyClass::getVertices() {
+int MyClass::vtx_selection() {// returns selected vertex id (if only one is found)
 
-  double Zv_tmp = 0., Rhov_tmp = 0.;
-  int ip_tmp = 0, indx_tmp = -1;
+  int nvip = 0; // number of vertices at IP (vip) within the fiducial volume 
   
-  for (int k = 0; k < nv; k++) {// begin loop
-    Zv_tmp = TMath::Abs(zv[k] - bz);
-    Rhov_tmp = TMath::Sqrt((xv[k] - bx) * (xv[k] - bx) + (yv[k] - by) * (yv[k] - by));
-    //cout << "Zv_tmp = " << Zv_tmp << ", Rhov_tmp = " << Rhov_tmp << endl;
-    if (Zv_tmp <= Zvmax && Rhov_tmp <= Rhovmax) { // fiducial volume
-      ip_tmp ++;
-      indx_tmp = k;
-    }
-  }// end loop
-
-  iv_ip = ip_tmp;
-  iv_indx = indx_tmp;
+  return nvip;
   
 }

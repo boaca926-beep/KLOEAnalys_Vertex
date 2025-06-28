@@ -327,14 +327,9 @@ public :
    TBranch        *b_mome_partsend;   //!
    TBranch        *b_beta_parts;   //!
 
-   int iv_ip;
-   int iv_indx;
-   int fiduial_indx = -1;
-  
    double Zvmax;
    double Rhovmax;   
 
-   double evnt_sum;
    double evnt_fidual;
   
    MyClass(TTree *tree=0);
@@ -347,8 +342,10 @@ public :
    virtual bool     Notify();
    virtual void     Show(Long64_t entry = -1);
 
-   void getVertices();
+   int vtx_selection();
 
+   TH2D *h_nvip_kvip;
+   TH2D *h_nvip1_kvip;
 };
 
 #endif
@@ -369,15 +366,18 @@ MyClass::MyClass(TTree *tree) : fChain(0)
    }
    Init(tree);
 
-   iv_ip = -1;
-   iv_indx = -1;
-   fiduial_indx = -1;
-   
    Rhovmax = 4;
    Zvmax = 10;
 
-   evnt_sum = 0;
    evnt_fidual = 0;
+
+   h_nvip_kvip = new TH2D("h_nvip_kvip", "h_nvip_kvip", 10, 0, 10, 10, 0, 10);
+   h_nvip_kvip->GetXaxis()->SetTitle("nvip");
+   h_nvip_kvip->GetYaxis()->SetTitle("kvip");
+
+   h_nvip1_kvip = new TH2D("h_nvip1_kvip", "h_nvip1_kvip", 10, 0, 10, 10, 0, 10);
+   h_nvip1_kvip->GetXaxis()->SetTitle("nvip1");
+   h_nvip1_kvip->GetYaxis()->SetTitle("kvip");
    
 }
 
