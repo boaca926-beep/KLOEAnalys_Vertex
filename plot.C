@@ -32,6 +32,7 @@ int plot(){
 
   TH2D *h_nvip_kvip = (TH2D *)file_input->Get("h_nvip_kvip");
   TH2D *h_nvip1_kvip = (TH2D *)file_input->Get("h_nvip1_kvip");
+  TH2D *h_ktv_kvip = (TH2D *)file_input->Get("h_ktv_kvip");
   
   // Plot
   TPaveText *pt_1 = new TPaveText(0.25, 0.82, 0.7, 0.86, "NDC");
@@ -99,7 +100,48 @@ int plot(){
   pt_2 -> Draw("Same");
   gPad->SetLogz(1);
 
+  //
+  double norm = h_ktv_kvip->Integral();
+  cout << norm << endl;
+  
+  TPaveText *pt_30 = new TPaveText(0.25, 0.82, 0.7, 0.86, "NDC");
+  TString pt_30_text = mc_type + " (nvip=1)";
+  SetPte(pt_30, pt_30_text);
+
+  TPaveText *pt_31 = new TPaveText(0.25, 0.77, 0.7, 0.81, "NDC");
+  TString pt_31_text = "kvip_nvip1 shifted by +1";
+  SetPte(pt_31, pt_31_text);
+
+  TCanvas *cv_2d_1 = new TCanvas("cv_2d_1", "iv[ktv] vs. kvip_nvip1", 0, 0, 800, 800);
+  cv_2d_1 -> Divide(1, 1);
+
+  cv_2d_1 -> cd(1);
+  gPad -> SetBottomMargin(0.15);//0.007
+  gPad -> SetLeftMargin(0.15);
+  gPad -> SetRightMargin(0.17);
+  
+  h_ktv_kvip -> GetXaxis() -> SetTitleOffset(1.2);
+  h_ktv_kvip -> GetXaxis() -> SetTitleSize(0.06);
+  h_ktv_kvip -> GetXaxis() -> CenterTitle();
+  h_ktv_kvip -> GetXaxis() -> SetLabelSize(0.06);
+  h_ktv_kvip -> GetXaxis() -> SetLabelOffset(0.01);
+  //h_ktv_kvip -> GetXaxis() -> SetRangeUser(0.2, 0.6);
+  
+  h_ktv_kvip -> GetYaxis() -> SetLabelOffset(0.01);
+  h_ktv_kvip -> GetYaxis() -> SetTitleOffset(1.2);
+  h_ktv_kvip -> GetYaxis() -> SetLabelSize(0.06);
+  h_ktv_kvip -> GetYaxis() -> SetTitleSize(0.06);
+  h_ktv_kvip -> GetYaxis() -> CenterTitle();
+
+  h_ktv_kvip -> GetZaxis() -> SetLabelSize(0.06);
+
+  h_ktv_kvip -> Draw("TEXT0COLZ");
+  pt_30 -> Draw("Same");
+  pt_31 -> Draw("Same");
+  gPad -> SetLogz(1);
+
   cv_2d -> SaveAs("vertex2D_" + mc_type + ".pdf");
+  cv_2d_1 -> SaveAs("scatter_shfit_" + mc_type + ".pdf");
   
   return 0;
   

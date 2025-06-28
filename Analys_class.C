@@ -4,6 +4,8 @@
 #include <fstream>
 #include <string>
 
+#include "path.h"
+
 using namespace std;
 
 int Analys_class(TString rootFile, TString sampleFile) {

@@ -346,6 +346,8 @@ public :
 
    TH2D *h_nvip_kvip;
    TH2D *h_nvip1_kvip;
+   TH2D *h_ktv_kvip;
+  
 };
 
 #endif
@@ -372,12 +374,16 @@ MyClass::MyClass(TTree *tree) : fChain(0)
    evnt_fidual = 0;
 
    h_nvip_kvip = new TH2D("h_nvip_kvip", "h_nvip_kvip", 10, 0, 10, 10, 0, 10);
-   h_nvip_kvip->GetXaxis()->SetTitle("nvip");
-   h_nvip_kvip->GetYaxis()->SetTitle("kvip");
+   h_nvip_kvip->GetXaxis()->SetTitle("Number of vertices (nvip)");
+   h_nvip_kvip->GetYaxis()->SetTitle("Index of vertices (kvip)");
 
    h_nvip1_kvip = new TH2D("h_nvip1_kvip", "h_nvip1_kvip", 10, 0, 10, 10, 0, 10);
-   h_nvip1_kvip->GetXaxis()->SetTitle("nvip1");
-   h_nvip1_kvip->GetYaxis()->SetTitle("kvip");
+   h_nvip1_kvip->GetXaxis()->SetTitle("Number of vertices (nvip)");
+   h_nvip1_kvip->GetYaxis()->SetTitle("Index of vertices (kvip)");
+
+   h_ktv_kvip = new TH2D("h_ktv_kvip", "h_ktv_kvip", 10, 0, 10, 10, 0, 10);
+   h_ktv_kvip->GetXaxis()->SetTitle("Index of track-vertices (iv[ktv])");
+   h_ktv_kvip->GetYaxis()->SetTitle("Index of selected vertex (kvip_nvip1)");
    
 }
 
