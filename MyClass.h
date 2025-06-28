@@ -327,6 +327,9 @@ public :
    TBranch        *b_mome_partsend;   //!
    TBranch        *b_beta_parts;   //!
 
+   double masschpion;
+   double massneupion;
+
    double Zvmax;
    double Rhovmax;   
 
@@ -344,6 +347,8 @@ public :
 
    int vtx_selection();
 
+   TLorentzVector Gettrack4vectorkinfit(int index);
+   
    TH2D *h_nvip_kvip;
    TH2D *h_nvip1_kvip;
    TH2D *h_ktv_kvip;
@@ -367,6 +372,10 @@ MyClass::MyClass(TTree *tree) : fChain(0)
 
    }
    Init(tree);
+
+   // initializing vaiables
+   masschpion = 139.57; // MeV
+   massneupion = 134.977; // MeV
 
    Rhovmax = 4;
    Zvmax = 10;

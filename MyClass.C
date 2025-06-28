@@ -59,10 +59,6 @@ void MyClass::Main()
     //cout << "nvip = " << nvip << ", kvip_nvip1 = " << kvip_nvip1 << endl; 
     h_nvip1_kvip -> Fill(nvip, kvip_nvip1); // nvip==1 vs. the corresponding index
 
-    TVector2 trkv_sel; // initialize selected vertex associated tracks
-    trkv_sel.SetX(-1); // X: index of pi+, with positive curvature
-    trkv_sel.SetY(-1); // Y: index of pi-, wiht negative curvature
-
     int ntv_vtxid = 0; // number of tracks (nvt) accociated with given index of vertex (vtxid)
 
     std::vector<TVector3> trkv_momenta; // track 3-momentum
@@ -96,9 +92,39 @@ void MyClass::Main()
 
     if (ntv_vtxid != 2 || trkv_charge[0] * trkv_charge[1] >= 0) continue; // select 2 tracks
     evnt_trk ++;
+
+    TVector2 trkv_sel; // initialize selected vertex associated tracks
+    trkv_sel.SetX(-1); // X: index of pi+, with positive curvature
+    trkv_sel.SetY(-1); // Y: index of pi-, wiht negative curvature
+
+    TVector3 trkmom_plus;
+    TVector3 trkmom_nega;
+	
+    if (trkv_charge[0]>0) {
+      trkv_sel.SetX(trkv_index[0]); // pi+ track index in NTV block 
+      trkv_sel.SetY(trkv_index[1]); // pi- track index in NTV block
+
+      trkmom_plus = trkv_momenta[0];
+      trkmom_nega = trkv_momenta[1];
+    }
+    else {
+      trkv_sel.SetX(trkv_index[1]); //pi+ in the NTV track block 
+      trkv_sel.SetY(trkv_index[0]); //pi- in the NTV track block
+
+      trkmom_plus = trkv_momenta[1];
+      trkmom_nega = trkv_momenta[0];
+    }
+
+    // get 4-vector using track-vertex parameters
+    TLorentzVector TLVector_ppl = Gettrack4vectorkinfit(trkv_sel.X());
+    TLorentzVector TLVector_pmi = Gettrack4vectorkinfit(trkv_sel.Y());
+    
     cout << "ntv_vtxid = " << ntv_vtxid << "\n"
-	 << "\ttrkv[0](charge, index, momenta.X, momenta.Y, momenta.Z) = (" << trkv_charge[0] << ", " << trkv_index[0] << ", " << trkv_momenta[0].X() << ", " << trkv_momenta[0].Y() << ", " << trkv_momenta[0].Z() << ")" << "\n "
-	 << "\ttrkv[1](charge, index, momenta.X, momenta.Y, momenta.Z) = (" << trkv_charge[1] << ", " << trkv_index[1] << ", " << trkv_momenta[1].X() << ", " << trkv_momenta[1].Y() << ", " << trkv_momenta[1].Z() << ")" << endl;
+	 << "\ttrkv[0](charge, index, px, py, pz) = (" << trkv_charge[0] << ", " << trkv_index[0] << ", " << trkv_momenta[0].X() << ", " << trkv_momenta[0].Y() << ", " << trkv_momenta[0].Z() << ")" << "\n "
+	 << "\ttrkv[1](charge, index, px, py, pz) = (" << trkv_charge[1] << ", " << trkv_index[1] << ", " << trkv_momenta[1].X() << ", " << trkv_momenta[1].Y() << ", " << trkv_momenta[1].Z() << ")" << "\n"
+	 << "\ttrk_plus: index = " << trkv_sel.X() << ", (px, py, pz) = (" << trkmom_plus.X() << ", " << trkmom_plus.Y() << ", " << trkmom_plus.Z() << "), checked by 4-vector (px, py, pz, E) = (" << TLVector_ppl.X() << ", " << TLVector_ppl.Y() << ", " << TLVector_ppl.Z() << ", " << TLVector_ppl.E() << ")\n"
+	 << "\ttrk_nega: index = " << trkv_sel.Y() << ", (px, py, pz) = (" << trkmom_nega.X() << ", " << trkmom_nega.Y() << ", " << trkmom_nega.Z() << "), checked by 4-vector (px, py, pz, E) = (" << TLVector_pmi.X() << ", " << TLVector_pmi.Y() << ", " << TLVector_pmi.Z() << ", " << TLVector_pmi.E() << ")\n";
+      
     
     
   }// end the main loop
@@ -117,4 +143,35 @@ int MyClass::vtx_selection() {// returns selected vertex id (if only one is foun
   
   return nvip;
   
+}
+
+TLorentzVector MyClass::Gettrack4vectorkinfit(int index) {
+
+  TLorentzVector tvector_smeared(0.,0.,0.,0.);
+  TLorentzVector tvector1(0.,0.,0.,0.);
+  double E=0., psq=0., ptran=0., px=0., py=0., pz=0.;
+  Double_t smearing_factor = 0.1501;
+  Double_t scale_factor = 0.000367;
+  double curv_tmp = curv[index];
+  double phi_tmp = phiv[index];
+  double cotan_tmp = cotv[index];
+  
+  ptran = 1000. * 1. / TMath::Abs(curv_tmp);
+  //Double_t ptransvSmeared = ptran*(1.+scale_factor);
+  //ptransvSmeared = generator->Gaus(ptransvSmeared,(TMath::Sqrt(sigcurv[index]))*smearing_factor*ptransvSmeared);
+
+  tvector1.SetX(ptran * TMath::Cos(phi_tmp));
+  tvector1.SetY(ptran * TMath::Sin(phi_tmp));
+  tvector1.SetZ(ptran * cotan_tmp);
+  tvector1.SetE(sqrt(masschpion*masschpion + tvector1.Vect().Mag2()));
+
+  /*
+  tvector_smeared.SetX(ptransvSmeared * TMath::Cos(phi));
+  tvector_smeared.SetY(ptransvSmeared * TMath::Sin(phi));
+  tvector_smeared.SetZ(ptransvSmeared * cotan);
+  tvector_smeared.SetE(sqrt(masschpion*masschpion + tvector_smeared.Vect().Mag2()));
+  */
+  
+  return tvector1;
+  //return tvector_smeared;
 }
