@@ -40,20 +40,20 @@ void MyClass::Main()
     for (int kv = 0; kv < nv; kv++) {// loop on vertices
       
       if (TMath::Abs(zv[kv] - bz) < Zvmax && TMath::Sqrt((xv[kv] - bx) * (xv[kv] - bx) + (yv[kv] - by) * (yv[kv] - by)) < Rhovmax) { // fiducial volume
-	
-	kvip[nvip] = kv;
+
 	nvip ++;
+	kvip[nvip] = kv + 1; // shift needed?
 	
-	h_nvip_kvip -> Fill(nvip, kvip[nvip - 1]);
+	h_nvip_kvip -> Fill(nvip, kvip[nvip]);
 	
-	cout << "nvip = " << nvip << ", kv = " << kv << ", kvip[" << nvip - 1  << "] = " << kvip[nvip - 1] << endl;
+	cout << "nvip = " << nvip << ", kv = " << kv << ", kvip[" << nvip << "] = " << kvip[nvip] << endl;
 	
       }// end fiducial volume
       
     } // end loop on vertices
 
     if (nvip != 1) continue; // select events with only 1 vertex within the fiducial volume
-    kvip_nvip1 = kvip[nvip - 1]; // store the index of the selected vertex, shift needed?
+    kvip_nvip1 = kvip[nvip]; // store the index of the selected vertex
     evnt_vtx1 ++; // count the number of selected events
     //cout << "nvip = " << nvip << ", kvip_nvip1 = " << kvip_nvip1 << endl; 
     h_nvip1_kvip -> Fill(nvip, kvip_nvip1); // nvip==1 vs. the corresponding index
@@ -118,13 +118,11 @@ void MyClass::Main()
     TLorentzVector TLVector_ppl = Gettrack4vectorkinfit(trkv_sel.X());
     TLorentzVector TLVector_pmi = Gettrack4vectorkinfit(trkv_sel.Y());
 
-    /*
     cout << "ntv_vtxid = " << ntv_vtxid << "\n"
 	 << "\ttrkv[0](charge, index, px, py, pz) = (" << trkv_charge[0] << ", " << trkv_index[0] << ", " << trkv_momenta[0].X() << ", " << trkv_momenta[0].Y() << ", " << trkv_momenta[0].Z() << ")" << "\n "
 	 << "\ttrkv[1](charge, index, px, py, pz) = (" << trkv_charge[1] << ", " << trkv_index[1] << ", " << trkv_momenta[1].X() << ", " << trkv_momenta[1].Y() << ", " << trkv_momenta[1].Z() << ")" << "\n"
 	 << "\ttrk_plus: index = " << trkv_sel.X() << ", (px, py, pz) = (" << trkmom_plus.X() << ", " << trkmom_plus.Y() << ", " << trkmom_plus.Z() << "), checked by 4-vector (px, py, pz, E) = (" << TLVector_ppl.X() << ", " << TLVector_ppl.Y() << ", " << TLVector_ppl.Z() << ", " << TLVector_ppl.E() << ")\n"
 	 << "\ttrk_nega: index = " << trkv_sel.Y() << ", (px, py, pz) = (" << trkmom_nega.X() << ", " << trkmom_nega.Y() << ", " << trkmom_nega.Z() << "), checked by 4-vector (px, py, pz, E) = (" << TLVector_pmi.X() << ", " << TLVector_pmi.Y() << ", " << TLVector_pmi.Z() << ", " << TLVector_pmi.E() << ")\n";
-    */
     
     
   }// end the main loop
