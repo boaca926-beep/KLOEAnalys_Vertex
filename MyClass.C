@@ -22,6 +22,8 @@ void MyClass::Main()
   Long64_t evnt_tot = 0;
   Long64_t evnt_vtx1 = 0;
   Long64_t evnt_trk = 0;
+
+  double xv_tmp = 0., yv_tmp = 0., zv_tmp = 0.;
   
   // fiducial parameters
   cout << "Zvmax = " << Zvmax << ", Rhovmax = " << Rhovmax << endl;
@@ -62,7 +64,11 @@ void MyClass::Main()
     double zv_nvip1 = ZV[nvip]; // index of vertex z position with nvip equal 1
     
     evnt_vtx1 ++; // count the number of selected events
-    cout << "nvip = " << nvip << ", kvip = " << kvip_nvip1 << ", (xv, yv, zv) = (" << xv_nvip1 << ", " << yv_nvip1 << ", " << zv_nvip1 << ")" << ", (bx, by, bz) = (" << bx << ", " << by << ", " << bz << ")" << endl; 
+    //double xv_tmp = XV[nvip];
+    //double test_coord = getvertex_coord(xv_tmp);
+    cout << "nvip = " << nvip << ", kvip = " << kvip_nvip1 << ", (xv, yv, zv) = (" << xv_nvip1 << ", " << yv_nvip1 << ", " << zv_nvip1 << ")" << ", (bx, by, bz) = (" << bx << ", " << by << ", " << bz << ")" << endl;
+    //cout << "xv_tmp = " << xv_tmp << endl;
+    
     h_nvip1_kvip -> Fill(nvip, kvip_nvip1); // nvip==1 vs. the corresponding index
 
     int ntv_vtxid = 0; // number of tracks (nvt) accociated with given index of vertex (vtxid)
@@ -96,7 +102,7 @@ void MyClass::Main()
 
     }// end loop over tracks connected to vertices
 
-    if (ntv_vtxid != 2 || trkv_charge[0] * trkv_charge[1] >= 0) continue; // select 2 tracks
+    if (ntv_vtxid != 2 || trkv_charge[0] * trkv_charge[1] >= 0) continue; // select 2 tracks with opposite signs
 
     TVector2 trkv_sel; // initialize selected vertex associated tracks
     trkv_sel.SetX(-1); // X: index of pi+, with positive curvature
@@ -195,4 +201,11 @@ bool MyClass::IfBroken(int idx1, int idx2) {
     return kTRUE;
   }
   else return kFALSE;
+}
+
+double MyClass::getvertex_coord(double x){
+
+  cout << x << endl;
+  
+  return 0;
 }

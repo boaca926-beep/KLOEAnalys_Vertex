@@ -350,7 +350,9 @@ public :
    TLorentzVector Gettrack4vectorkinfit(int index);
 
    bool IfBroken(int idx1, int idx2);
-   
+
+   double getvertex_coord(double x);
+  
    TH2D *h_nvip_kvip;
    TH2D *h_nvip1_kvip;
    TH2D *h_ktv_kvip;
