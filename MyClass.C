@@ -35,7 +35,7 @@ void MyClass::Main()
     
     int nvip = 0; // number of vertices at IP (vip) within the fiducial volume 
     int kvip[3]; // index of vip
-    int kvip_nvip1 = -1; // index of vertex with nvip equal 1
+    double XV[3], YV[3], ZV[3];
     
     for (int kv = 0; kv < nv; kv++) {// loop on vertices
       
@@ -43,19 +43,26 @@ void MyClass::Main()
 
 	nvip ++;
 	kvip[nvip] = kv + 1; // shift needed?
-	
 	h_nvip_kvip -> Fill(nvip, kvip[nvip]);
-	
-	cout << "nvip = " << nvip << ", kv = " << kv << ", kvip[" << nvip << "] = " << kvip[nvip] << endl;
+
+	XV[nvip] = xv[kv];
+	YV[nvip] = yv[kv];
+	ZV[nvip] = zv[kv];
+	  
+	cout << "nvip = " << nvip << ", kv = " << kv << ", kvip[" << nvip << "] = " << kvip[nvip] << ", (xv, yv, zv) = (" << xv[kv] << ", " << yv[kv] << ", " << zv[kv] << ")" << endl;
 	
       }// end fiducial volume
-      
-    } // end loop on vertices
 
+    } // end loop on vertices
+    
     if (nvip != 1) continue; // select events with only 1 vertex within the fiducial volume
-    kvip_nvip1 = kvip[nvip]; // store the index of the selected vertex
+    int kvip_nvip1 = kvip[nvip]; // index of vertex with nvip equal 1
+    double xv_nvip1 = XV[nvip]; // index of vertex x position with nvip equal 1
+    double yv_nvip1 = YV[nvip]; // index of vertex y position with nvip equal 1
+    double zv_nvip1 = ZV[nvip]; // index of vertex z position with nvip equal 1
+    
     evnt_vtx1 ++; // count the number of selected events
-    //cout << "nvip = " << nvip << ", kvip_nvip1 = " << kvip_nvip1 << endl; 
+    cout << "nvip = " << nvip << ", kvip = " << kvip_nvip1 << ", (xv, yv, zv) = (" << xv_nvip1 << ", " << yv_nvip1 << ", " << zv_nvip1 << ")" << ", (bx, by, bz) = (" << bx << ", " << by << ", " << bz << ")" << endl; 
     h_nvip1_kvip -> Fill(nvip, kvip_nvip1); // nvip==1 vs. the corresponding index
 
     int ntv_vtxid = 0; // number of tracks (nvt) accociated with given index of vertex (vtxid)
@@ -90,7 +97,6 @@ void MyClass::Main()
     }// end loop over tracks connected to vertices
 
     if (ntv_vtxid != 2 || trkv_charge[0] * trkv_charge[1] >= 0) continue; // select 2 tracks
-    evnt_trk ++;
 
     TVector2 trkv_sel; // initialize selected vertex associated tracks
     trkv_sel.SetX(-1); // X: index of pi+, with positive curvature
@@ -118,11 +124,21 @@ void MyClass::Main()
     TLorentzVector TLVector_ppl = Gettrack4vectorkinfit(trkv_sel.X());
     TLorentzVector TLVector_pmi = Gettrack4vectorkinfit(trkv_sel.Y());
 
+    // broken tracks
+    Bool_t ifbroken = IfBroken(trkv_sel.X(), trkv_sel.Y());
+    if (ifbroken) continue; // select good pair of tracks
+
+    /*
     cout << "ntv_vtxid = " << ntv_vtxid << "\n"
 	 << "\ttrkv[0](charge, index, px, py, pz) = (" << trkv_charge[0] << ", " << trkv_index[0] << ", " << trkv_momenta[0].X() << ", " << trkv_momenta[0].Y() << ", " << trkv_momenta[0].Z() << ")" << "\n "
 	 << "\ttrkv[1](charge, index, px, py, pz) = (" << trkv_charge[1] << ", " << trkv_index[1] << ", " << trkv_momenta[1].X() << ", " << trkv_momenta[1].Y() << ", " << trkv_momenta[1].Z() << ")" << "\n"
 	 << "\ttrk_plus: index = " << trkv_sel.X() << ", (px, py, pz) = (" << trkmom_plus.X() << ", " << trkmom_plus.Y() << ", " << trkmom_plus.Z() << "), checked by 4-vector (px, py, pz, E) = (" << TLVector_ppl.X() << ", " << TLVector_ppl.Y() << ", " << TLVector_ppl.Z() << ", " << TLVector_ppl.E() << ")\n"
 	 << "\ttrk_nega: index = " << trkv_sel.Y() << ", (px, py, pz) = (" << trkmom_nega.X() << ", " << trkmom_nega.Y() << ", " << trkmom_nega.Z() << "), checked by 4-vector (px, py, pz, E) = (" << TLVector_pmi.X() << ", " << TLVector_pmi.Y() << ", " << TLVector_pmi.Z() << ", " << TLVector_pmi.E() << ")\n";
+    */
+    
+    evnt_trk ++;
+
+    
     
     
   }// end the main loop
@@ -172,4 +188,11 @@ TLorentzVector MyClass::Gettrack4vectorkinfit(int index) {
   
   return tvector1;
   //return tvector_smeared;
+}
+
+bool MyClass::IfBroken(int idx1, int idx2) {
+  if (TMath::Abs(cotv[idx1] + cotv[idx2]) < 0.1 && TMath::Abs((curv[idx1] + curv[idx2]) / curv[idx1]) < 0.2) {
+    return kTRUE;
+  }
+  else return kFALSE;
 }
